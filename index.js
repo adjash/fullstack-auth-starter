@@ -1,22 +1,20 @@
-const express = require("express");
+import express from "express";
+import { databaseInstance } from "./src/db/db.js";
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
+const db = new databaseInstance();
+db.setup();
+
 app.post("/login", (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username) return res.status(400).send("Please enter a username");
+    const { email, password } = req.body;
+    if (!email) return res.status(400).send("Please enter a email");
     if (!password) return res.status(400).send("Please enter a password");
 
-    if (username === "user" && password === "password") {
-      res.status(200).send("logged in!");
-      return;
-    } else {
-      res.status(400).send("incorrect details");
-      return;
-    }
+    res.status(200).json(db.loginUser(email, password));
   } catch (err) {
     console.log(err);
     res.status(500).send("something went wrong");
@@ -32,8 +30,7 @@ app.post("/register", (req, res) => {
     if (!password) return res.status(400).send("Please enter a password");
 
     console.log(username, email, password);
-    res.status(200).send("registered");
-    return;
+    return res.status(200).json(db.insertUser(username, email, password));
   } catch (err) {
     console.log(err);
     return res.status(500).send("something went wrong");
