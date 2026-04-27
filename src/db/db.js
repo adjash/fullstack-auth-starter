@@ -17,31 +17,53 @@ export class databaseInstance {
 
   insertUser(username, email, password) {
     try {
-      this.db
+      const insertRes = this.db
         .prepare(
           `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
         )
         .run(username, email, password);
-      return { message: "User created" };
+      console.log(insertRes);
+      if (insertRes.changes === 1) {
+        return {
+          message: "User created",
+          status: 200,
+        };
+      }
+      return {
+        message: "User not created",
+        status: 400,
+      };
     } catch (err) {
       console.log(err);
-      return { message: "Unable to create user" };
+      if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+        return {
+          message: "A user with this email address is already registered",
+          status: 409,
+        };
+      }
+      return { message: "Unable to create user", status: 500 };
     }
   }
 
   loginUser(email, password) {
     try {
       const value = this.db
-        .prepare(`SELECT password FROM users WHERE email = ?`)
+        .prepare(`SELECT * FROM users WHERE email = ?`)
         .get(email);
-      if (value.password === password) {
+      if (value?.password === password) {
         console.log("successful login");
-        return { message: "logged in" };
+        return {
+          message: "logged in",
+          status: 200,
+        };
       }
-      return { message: "Incorrect details..." };
+      return {
+        message: "Incorrect details...",
+        status: 400,
+      };
     } catch (err) {
       console.log(err);
-      return { message: "Unable to log you in" };
+      return { message: "Unable to log you in", status: 500 };
     }
   }
 }

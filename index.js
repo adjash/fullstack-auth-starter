@@ -14,7 +14,10 @@ app.post("/login", (req, res) => {
     if (!email) return res.status(400).send("Please enter a email");
     if (!password) return res.status(400).send("Please enter a password");
 
-    res.status(200).json(db.loginUser(email, password));
+    const loginOperation = db.loginUser(email, password);
+    return res
+      .status(loginOperation.status)
+      .json({ message: loginOperation.message });
   } catch (err) {
     console.log(err);
     res.status(500).send("something went wrong");
@@ -30,7 +33,10 @@ app.post("/register", (req, res) => {
     if (!password) return res.status(400).send("Please enter a password");
 
     console.log(username, email, password);
-    return res.status(200).json(db.insertUser(username, email, password));
+    const registerOperation = db.insertUser(username, email, password);
+    return res
+      .status(registerOperation.status)
+      .json({ message: registerOperation.message });
   } catch (err) {
     console.log(err);
     return res.status(500).send("something went wrong");
