@@ -39,8 +39,6 @@ app.use(
 
 //database setup
 const db = new databaseInstance();
-//for testing while we're using sqlite, just call setup as it'll make sure the tables are setup
-db.setup();
 
 //basic index route for testing
 app.get("/", function (req, res) {
@@ -50,13 +48,13 @@ app.get("/", function (req, res) {
 //login route
 //makes database function call to check if the provided data is valid
 //I'm starting to think it might make more sense to have the logic to check if the password is valid inside the route, instead of at the database level.
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email) return res.status(400).send("Please enter a email");
     if (!password) return res.status(400).send("Please enter a password");
 
-    const loginOperation = db.loginUser(email, password);
+    const loginOperation = await db.loginUser(email, password);
     return res
       .status(loginOperation.status)
       .json({ message: loginOperation.message });
@@ -70,7 +68,7 @@ app.post("/login", (req, res) => {
 //register user route
 //makes database function call to insert a user with the provided data
 //Might make more sense to have it return a 'inserted', or something similar to indicate the operation happened successfully.
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username) return res.status(400).send("Please enter a username");
@@ -78,7 +76,7 @@ app.post("/register", (req, res) => {
     if (!password) return res.status(400).send("Please enter a password");
 
     console.log(username, email, password);
-    const registerOperation = db.insertUser(username, email, password);
+    const registerOperation = await db.insertUser(username, email, password);
     return res
       .status(registerOperation.status)
       .json({ message: registerOperation.message });
